@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aroma & Co. — Artisan Café</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #f5efe6;
+    --espresso: #1a0f0a;
+    --caramel: #c8853a;
+    --latte: #d4aa7d;
+    --foam: #faf6f0;
+    --dark: #0d0805;
+    --text-muted: #7a6a5a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--dark);
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--caramel);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.1s ease;
+    mix-blend-mode: difference;
+  }
+  .cursor-follower {
+    width: 36px; height: 36px;
+    border: 1px solid var(--caramel);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    transition: all 0.15s ease;
+    opacity: 0.5;
+  }
+
+  /* ── NAVBAR ── */
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 100;
+    padding: 24px 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(to bottom, rgba(13,8,5,0.9), transparent);
+    backdrop-filter: blur(2px);
+  }
+  .logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem; font-weight: 300; letter-spacing: 0.15em;
+    color: var(--latte);
+  }
+  .logo span { color: var(--caramel); font-style: italic; }
+  .nav-links { display: flex; gap: 36px; list-style: none; }
+  .nav-links a {
+    color: var(--cream); opacity: 0.7;
+    text-decoration: none; font-size: 0.78rem;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    transition: opacity 0.3s, color 0.3s;
+  }
+  .nav-links a:hover { opacity: 1; color: var(--caramel); }
+  .nav-cta {
+    padding: 10px 24px;
+    border: 1px solid var(--caramel);
+    color: var(--caramel) !important; opacity: 1 !important;
+    border-radius: 2px;
+    transition: background 0.3s !important;
+  }
+  .nav-cta:hover { background: var(--caramel) !important; color: var(--dark) !important; }
+
+  /* ── HERO ── */
+  .hero {
+    height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+    background: radial-gradient(ellipse at 60% 50%, #2a1508 0%, #0d0805 70%);
+  }
+
+  /* 3D floating coffee cup scene */
+  .scene-3d {
+    position: absolute;
+    right: 8%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 420px; height: 420px;
+    perspective: 800px;
+  }
+  .cup-wrapper {
+    width: 100%; height: 100%;
+    transform-style: preserve-3d;
+    animation: floatRotate 8s ease-in-out infinite;
+  }
+  @keyframes floatRotate {
+    0%,100% { transform: rotateY(-15deg) rotateX(8deg) translateY(0px); }
+    50% { transform: rotateY(15deg) rotateX(-5deg) translateY(-20px); }
+  }
+
+  /* SVG cup drawn with CSS */
+  .cup-svg {
+    width: 100%; height: 100%;
+    filter: drop-shadow(0 30px 60px rgba(200,133,58,0.3));
+  }
+
+  /* Steam animation */
+  .steam { animation: steamRise 3s ease-in-out infinite; opacity: 0; }
+  .steam:nth-child(1) { animation-delay: 0s; }
+  .steam:nth-child(2) { animation-delay: 0.8s; }
+  .steam:nth-child(3) { animation-delay: 1.6s; }
+  @keyframes steamRise {
+    0% { opacity: 0; transform: translateY(0) scaleX(1); }
+    30% { opacity: 0.6; }
+    100% { opacity: 0; transform: translateY(-60px) scaleX(2); }
+  }
+
+  /* Floating particles */
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--caramel);
+    opacity: 0;
+    animation: particleDrift linear infinite;
+  }
+  @keyframes particleDrift {
+    0% { opacity: 0; transform: translateY(0) translateX(0); }
+    20% { opacity: 0.4; }
+    80% { opacity: 0.2; }
+    100% { opacity: 0; transform: translateY(-200px) translateX(30px); }
+  }
+
+  .hero-content {
+    position: relative; z-index: 2;
+    max-width: 600px;
+    padding-left: 10%;
+  }
+  .hero-eyebrow {
+    font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--caramel); margin-bottom: 20px;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.3s forwards;
+  }
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3.5rem, 6vw, 5.5rem);
+    font-weight: 300; line-height: 1.05;
+    color: var(--foam);
+    opacity: 0;
+    animation: fadeUp 1s ease 0.5s forwards;
+  }
+  .hero-title em {
+    font-style: italic; color: var(--caramel);
+    display: block;
+  }
+  .hero-subtitle {
+    margin-top: 20px;
+    font-size: 0.95rem; line-height: 1.7;
+    color: var(--text-muted);
+    max-width: 400px;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.7s forwards;
+  }
+  .hero-actions {
+    margin-top: 40px; display: flex; gap: 16px; align-items: center;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.9s forwards;
+  }
+  .btn-primary {
+    padding: 14px 36px;
+    background: var(--caramel);
+    color: var(--dark); font-size: 0.8rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    border: none; border-radius: 2px; cursor: none;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(200,133,58,0.35);
+  }
+  .btn-ghost {
+    color: var(--cream); font-size: 0.8rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    text-decoration: none; opacity: 0.6;
+    display: flex; align-items: center; gap: 8px;
+    transition: opacity 0.2s;
+  }
+  .btn-ghost:hover { opacity: 1; }
+  .btn-ghost::after {
+    content: '→';
+    transition: transform 0.2s;
+  }
+  .btn-ghost:hover::after { transform: translateX(4px); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Scroll indicator */
+  .scroll-hint {
+    position: absolute; bottom: 36px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    opacity: 0.4; font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+    animation: fadeUp 1s ease 1.5s forwards;
+  }
+  .scroll-line {
+    width: 1px; height: 50px;
+    background: linear-gradient(to bottom, var(--caramel), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+  @keyframes scrollPulse {
+    0%,100% { transform: scaleY(1); opacity: 0.4; }
+    50% { transform: scaleY(0.5); opacity: 1; }
+  }
+
+  /* ── MARQUEE ── */
+  .marquee-section {
+    overflow: hidden;
+    border-top: 1px solid rgba(200,133,58,0.15);
+    border-bottom: 1px solid rgba(200,133,58,0.15);
+    padding: 16px 0;
+    background: rgba(200,133,58,0.04);
+  }
+  .marquee-track {
+    display: flex; gap: 60px;
+    animation: marquee 20s linear infinite;
+    white-space: nowrap;
+  }
+  .marquee-item {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem; font-style: italic;
+    color: var(--caramel); opacity: 0.6;
+    letter-spacing: 0.1em;
+    flex-shrink: 0;
+  }
+  .marquee-dot { color: var(--caramel); opacity: 0.3; }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ── ABOUT / STORY ── */
+  .section { padding: 120px 10%; }
+  .section-label {
+    font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--caramel); margin-bottom: 16px;
+    opacity: 0; transform: translateY(20px);
+    transition: all 0.6s ease;
+  }
+  .section-label.visible { opacity: 1; transform: translateY(0); }
+
+  .story-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px; align-items: center;
+  }
+  .story-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 300; line-height: 1.15;
+    color: var(--foam);
+    opacity: 0; transform: translateY(30px);
+    transition: all 0.8s ease 0.1s;
+  }
+  .story-title.visible { opacity: 1; transform: translateY(0); }
+  .story-title em { font-style: italic; color: var(--caramel); }
+  .story-text {
+    color: var(--text-muted); line-height: 1.9; font-size: 0.92rem;
+    opacity: 0; transform: translateY(30px);
+    transition: all 0.8s ease 0.3s;
+  }
+  .story-text.visible { opacity: 1; transform: translateY(0); }
+  .story-text p + p { margin-top: 16px; }
+
+  /* 3D card for story image */
+  .story-visual {
+    position: relative; height: 480px;
+    opacity: 0; transform: translateX(40px);
+    transition: all 0.9s ease 0.2s;
+  }
+  .story-visual.visible { opacity: 1; transform: translateX(0); }
+  .card-3d {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, #2a1508 0%, #1a0f0a 50%, #2d1a0a 100%);
+    border-radius: 4px;
+    border: 1px solid rgba(200,133,58,0.2);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+    transform-style: preserve-3d;
+    transition: transform 0.4s ease;
+    cursor: none;
+  }
+  .card-3d:hover {
+    transform: rotateY(-8deg) rotateX(4deg) scale(1.02);
+    box-shadow: 20px 20px 60px rgba(0,0,0,0.5), -4px -4px 30px rgba(200,133,58,0.1);
+  }
+  .card-3d::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 30% 30%, rgba(200,133,58,0.12), transparent 60%);
+  }
+  .card-inner-art {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 8rem; opacity: 0.08;
+    position: absolute;
+    color: var(--caramel);
+  }
+  .card-badge {
+    position: absolute; bottom: 30px; left: 30px; right: 30px;
+    padding: 20px 24px;
+    background: rgba(13,8,5,0.8);
+    border: 1px solid rgba(200,133,58,0.2);
+    border-radius: 3px;
+    backdrop-filter: blur(8px);
+  }
+  .card-badge-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem; color: var(--foam);
+  }
+  .card-badge-sub {
+    font-size: 0.72rem; color: var(--text-muted);
+    letter-spacing: 0.1em; margin-top: 4px;
+  }
+
+  /* Stats */
+  .stats-row {
+    display: flex; gap: 0;
+    margin-top: 60px;
+    border-top: 1px solid rgba(200,133,58,0.1);
+    padding-top: 40px;
+  }
+  .stat {
+    flex: 1; text-align: center;
+    border-right: 1px solid rgba(200,133,58,0.1);
+    padding: 0 20px;
+    opacity: 0; transform: translateY(20px);
+    transition: all 0.6s ease;
+  }
+  .stat:last-child { border-right: none; }
+  .stat.visible { opacity: 1; transform: translateY(0); }
+  .stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.8rem; font-weight: 300;
+    color: var(--caramel);
+  }
+  .stat-label {
+    font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--text-muted); margin-top: 4px;
+  }
+
+  /* ── MENU ── */
+  .menu-section {
+    padding: 120px 10%;
+    background: radial-gradient(ellipse at 50% 0%, rgba(200,133,58,0.05), transparent 60%);
+  }
+  .menu-header { text-align: center; margin-bottom: 70px; }
+  .menu-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 300; color: var(--foam);
+    opacity: 0; transform: translateY(30px);
+    transition: all 0.8s ease;
+  }
+  .menu-title.visible { opacity: 1; transform: translateY(0); }
+  .menu-title em { font-style: italic; color: var(--caramel); }
+
+  .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .menu-card {
+    padding: 36px 30px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(200,133,58,0.12);
+    border-radius: 4px;
+    position: relative; overflow: hidden;
+    transition: all 0.4s ease;
+    opacity: 0; transform: translateY(30px);
+    cursor: none;
+  }
+  .menu-card.visible { opacity: 1; transform: translateY(0); }
+  .menu-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0;
+    width: 3px; height: 0;
+    background: var(--caramel);
+    transition: height 0.4s ease;
+  }
+  .menu-card:hover {
+    background: rgba(200,133,58,0.06);
+    border-color: rgba(200,133,58,0.3);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+  }
+  .menu-card:hover::before { height: 100%; }
+  .menu-icon { font-size: 2rem; margin-bottom: 16px; }
+  .menu-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem; font-weight: 400;
+    color: var(--foam); margin-bottom: 8px;
+  }
+  .menu-desc {
+    font-size: 0.82rem; color: var(--text-muted); line-height: 1.7;
+    margin-bottom: 20px;
+  }
+  .menu-price {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem; color: var(--caramel);
+  }
+
+  /* ── ATMOSPHERE ── */
+  .atmo-section {
+    padding: 120px 10%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px; align-items: center;
+  }
+  .atmo-left { }
+  .atmo-right { }
+  .atmo-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 300; line-height: 1.2; color: var(--foam);
+    opacity: 0; transform: translateY(20px);
+    transition: all 0.8s ease;
+  }
+  .atmo-title.visible { opacity: 1; transform: translateY(0); }
+  .atmo-title em { font-style: italic; color: var(--caramel); }
+  .atmo-text {
+    margin-top: 20px;
+    color: var(--text-muted); line-height: 1.9; font-size: 0.9rem;
+    opacity: 0; transform: translateY(20px);
+    transition: all 0.8s ease 0.2s;
+  }
+  .atmo-text.visible { opacity: 1; transform: translateY(0); }
+
+  .hours-grid {
+    display: grid; gap: 12px; margin-top: 32px;
+    opacity: 0; transform: translateY(20px);
+    transition: all 0.8s ease 0.4s;
+  }
+  .hours-grid.visible { opacity: 1; transform: translateY(0); }
+  .hours-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(200,133,58,0.1);
+    font-size: 0.85rem;
+  }
+  .hours-day { color: var(--text-muted); }
+  .hours-time { color: var(--latte); }
+
+  /* right side big card */
+  .atmo-card-big {
+    height: 500px;
+    background: linear-gradient(160deg, #2a1508, #0d0805);
+    border: 1px solid rgba(200,133,58,0.15);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+    opacity: 0; transform: translateX(40px);
+    transition: all 0.9s ease 0.3s;
+  }
+  .atmo-card-big.visible { opacity: 1; transform: translateX(0); }
+  .atmo-card-big::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 80%, rgba(200,133,58,0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(200,133,58,0.08) 0%, transparent 50%);
+  }
+  .atmo-art {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 10rem; opacity: 0.05; color: var(--caramel);
+    position: absolute; top: -20px; right: -20px;
+    line-height: 1;
+  }
+  .atmo-quote {
+    position: relative; padding: 40px;
+    text-align: center;
+  }
+  .atmo-quote blockquote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem; font-style: italic;
+    font-weight: 300; line-height: 1.5;
+    color: var(--foam);
+  }
+  .atmo-quote cite {
+    display: block; margin-top: 16px;
+    font-size: 0.72rem; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--caramel);
+    font-style: normal;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 60px 10% 40px;
+    border-top: 1px solid rgba(200,133,58,0.1);
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 20px;
+  }
+  .footer-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem; font-weight: 300;
+    color: var(--latte); letter-spacing: 0.1em;
+  }
+  .footer-logo span { color: var(--caramel); font-style: italic; }
+  .footer-text { font-size: 0.78rem; color: var(--text-muted); }
+  .footer-links { display: flex; gap: 24px; }
+  .footer-links a {
+    font-size: 0.75rem; color: var(--text-muted);
+    text-decoration: none; letter-spacing: 0.08em;
+    transition: color 0.3s;
+  }
+  .footer-links a:hover { color: var(--caramel); }
+
+  /* ── GRAIN OVERLAY ── */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 1000;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    nav { padding: 20px 24px; }
+    .nav-links { display: none; }
+    .story-grid, .atmo-section { grid-template-columns: 1fr; }
+    .menu-grid { grid-template-columns: 1fr; }
+    .hero-content { padding-left: 6%; }
+    .scene-3d { display: none; }
+    .stats-row { flex-wrap: wrap; }
+    .stat { min-width: 50%; }
+    footer { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-follower" id="cursorFollower"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Aroma <span>&</span> Co.</div>
+  <ul class="nav-links">
+    <li><a href="#story">Our Story</a></li>
+    <li><a href="#menu">Menu</a></li>
+    <li><a href="#visit">Visit Us</a></li>
+    <li><a href="#visit" class="nav-cta">Reserve a Table</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <!-- Floating particles -->
+  <div class="particle" style="width:4px;height:4px;left:15%;bottom:20%;animation-duration:6s;animation-delay:0s;"></div>
+  <div class="particle" style="width:3px;height:3px;left:25%;bottom:15%;animation-duration:8s;animation-delay:1s;"></div>
+  <div class="particle" style="width:5px;height:5px;left:20%;bottom:30%;animation-duration:7s;animation-delay:2s;"></div>
+  <div class="particle" style="width:2px;height:2px;left:40%;bottom:10%;animation-duration:9s;animation-delay:0.5s;"></div>
+  <div class="particle" style="width:4px;height:4px;left:55%;bottom:25%;animation-duration:5s;animation-delay:1.5s;"></div>
+
+  <!-- 3D Cup Scene -->
+  <div class="scene-3d">
+    <div class="cup-wrapper">
+      <svg class="cup-svg" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+        <!-- Saucer shadow -->
+        <ellipse cx="150" cy="270" rx="80" ry="12" fill="rgba(0,0,0,0.5)"/>
+        <!-- Saucer -->
+        <ellipse cx="150" cy="252" rx="85" ry="14" fill="#2a1508"/>
+        <ellipse cx="150" cy="248" rx="85" ry="14" fill="#3a2010"/>
+        <ellipse cx="150" cy="246" rx="80" ry="11" fill="#4a2c14"/>
+        <!-- Cup body -->
+        <path d="M 95 200 Q 90 160 98 120 L 202 120 Q 210 160 205 200 Z" fill="#3a2010"/>
+        <path d="M 97 198 Q 92 160 100 122 L 200 122 Q 208 160 203 198 Z" fill="#4a2c14"/>
+        <!-- Cup highlight -->
+        <path d="M 104 140 Q 102 165 105 190" stroke="rgba(200,133,58,0.3)" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- Handle -->
+        <path d="M 200 145 Q 240 145 240 165 Q 240 185 200 180" stroke="#3a2010" stroke-width="14" fill="none" stroke-linecap="round"/>
+        <path d="M 200 145 Q 236 145 236 165 Q 236 183 200 178" stroke="#4a2c14" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <!-- Coffee surface -->
+        <ellipse cx="150" cy="122" rx="52" ry="10" fill="#1a0a04"/>
+        <ellipse cx="150" cy="120" rx="52" ry="10" fill="#2d1208"/>
+        <!-- Latte art on coffee -->
+        <path d="M 130 118 Q 150 108 170 118" stroke="rgba(212,170,125,0.5)" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M 135 122 Q 150 114 165 122" stroke="rgba(212,170,125,0.4)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <ellipse cx="150" cy="120" rx="10" ry="6" fill="rgba(212,170,125,0.3)"/>
+        <!-- Steam paths -->
+        <path class="steam" d="M 130 110 Q 125 90 132 70" stroke="rgba(250,246,240,0.6)" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path class="steam" d="M 150 108 Q 148 85 155 65" stroke="rgba(250,246,240,0.6)" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path class="steam" d="M 170 110 Q 172 88 167 68" stroke="rgba(250,246,240,0.6)" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <!-- Cup logo -->
+        <text x="133" y="175" font-family="serif" font-size="16" fill="rgba(200,133,58,0.5)" font-style="italic">A&C</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="hero-content">
+    <p class="hero-eyebrow">Est. 2019 · Bengaluru, Karnataka</p>
+    <h1 class="hero-title">
+      Where every sip<br>
+      <em>tells a story.</em>
+    </h1>
+    <p class="hero-subtitle">
+      Handcrafted coffee, artisan pastries, and an atmosphere that slows time down. Come as you are. Stay as long as you like.
+    </p>
+    <div class="hero-actions">
+      <a href="#menu" class="btn-primary">Explore Our Menu</a>
+      <a href="#visit" class="btn-ghost">Find Us</a>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-section">
+  <div class="marquee-track">
+    <span class="marquee-item">Specialty Coffee</span>
+    <span class="marquee-dot">✦</span>
+    <span class="marquee-item">Artisan Pastries</span>
+    <span class="marquee-dot">✦</span>
+    <span class="marquee-item">Fresh Roasts Daily</span>
+    <span class="marquee-dot">✦</span>
+    <span class="marquee-item">Latte Art</span>
+    <span class="marquee-dot">✦</span>
+    <span class="marquee-item">Cozy Atmosphere</span>
+    <span class="marquee-dot">✦</span>
+    <span class="marquee-item">Bengaluru's Finest</span>
+    <span class="marquee-dot">✦</span>
+    <span class="marquee-item">Specialty Coffee</span>
+    <span class="marquee-dot">✦</span>
+    <span class="marquee-item">Artisan Pastries</span>
+    <span class="marquee-dot">✦</span>
+    <span class="marquee-item">Fresh Roasts Daily</span>
+    <span class="marquee-dot">✦</span>
+    <span class="marquee-item">Latte Art</span>
+    <span class="marquee-dot">✦</span>
+    <span class="marquee-item">Cozy Atmosphere</span>
+    <span class="marquee-dot">✦</span>
+    <span class="marquee-item">Bengaluru's Finest</span>
+    <span class="marquee-dot">✦</span>
+  </div>
+</div>
+
+<!-- STORY -->
+<section class="section" id="story">
+  <p class="section-label">Our Story</p>
+  <div class="story-grid">
+    <div>
+      <h2 class="story-title">Crafted with <em>passion,</em><br>served with love.</h2>
+      <div class="story-text" style="margin-top: 28px;">
+        <p>Born from a love of slow mornings and good conversations, Aroma & Co. opened its doors in 2019 with one simple belief — that great coffee should feel like a warm hug.</p>
+        <p>We source single-origin beans directly from estates across Coorg and Chikmagalur, roasted in-house every morning so every cup you get is as fresh as it gets.</p>
+      </div>
+      <div class="stats-row">
+        <div class="stat">
+          <div class="stat-num">6+</div>
+          <div class="stat-label">Years Running</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">12K</div>
+          <div class="stat-label">Happy Customers</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">100%</div>
+          <div class="stat-label">Single Origin</div>
+        </div>
+      </div>
+    </div>
+    <div class="story-visual">
+      <div class="card-3d" id="card3d">
+        <div class="card-inner-art">☕</div>
+        <div class="card-badge">
+          <div class="card-badge-title">The Signature Blend</div>
+          <div class="card-badge-sub">Dark Roast · Coorg & Chikmagalur Estate · Notes of Chocolate & Hazelnut</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MENU -->
+<section class="menu-section" id="menu">
+  <div class="menu-header">
+    <p class="section-label" style="text-align:center;">What We Serve</p>
+    <h2 class="menu-title">A menu made to <em>linger over.</em></h2>
+  </div>
+  <div class="menu-grid">
+    <div class="menu-card">
+      <div class="menu-icon">☕</div>
+      <div class="menu-name">Signature Espresso</div>
+      <div class="menu-desc">Double shot of our house blend. Rich, bold, and unapologetically strong — the way a morning should start.</div>
+      <div class="menu-price">₹ 120</div>
+    </div>
+    <div class="menu-card" style="transition-delay:0.1s">
+      <div class="menu-icon">🥛</div>
+      <div class="menu-name">Cardamom Latte</div>
+      <div class="menu-desc">Espresso with steamed milk, a whisper of cardamom, and hand-poured latte art. Comfort in a cup.</div>
+      <div class="menu-price">₹ 180</div>
+    </div>
+    <div class="menu-card" style="transition-delay:0.2s">
+      <div class="menu-icon">🍵</div>
+      <div class="menu-name">Masala Chai Cortado</div>
+      <div class="menu-desc">Our East-meets-West fusion. A cortado base layered with spiced chai reduction. Unexpected and unforgettable.</div>
+      <div class="menu-price">₹ 160</div>
+    </div>
+    <div class="menu-card" style="transition-delay:0.3s">
+      <div class="menu-icon">🥐</div>
+      <div class="menu-name">Butter Croissant</div>
+      <div class="menu-desc">Flaky, golden, and baked fresh every morning. Pair it with any coffee for a proper Bengaluru morning.</div>
+      <div class="menu-price">₹ 90</div>
+    </div>
+    <div class="menu-card" style="transition-delay:0.4s">
+      <div class="menu-icon">🍰</div>
+      <div class="menu-name">Coffee Opera Cake</div>
+      <div class="menu-desc">Layers of almond sponge, coffee buttercream, and dark ganache. The dessert that always sells out first.</div>
+      <div class="menu-price">₹ 220</div>
+    </div>
+    <div class="menu-card" style="transition-delay:0.5s">
+      <div class="menu-icon">🧊</div>
+      <div class="menu-name">Cold Brew Tonic</div>
+      <div class="menu-desc">18-hour cold brew over tonic water with a lime twist. Sparkling, bright, and dangerously refreshing.</div>
+      <div class="menu-price">₹ 200</div>
+    </div>
+  </div>
+</section>
+
+<!-- ATMOSPHERE / VISIT -->
+<section class="atmo-section" id="visit">
+  <div class="atmo-left">
+    <p class="section-label">Come Find Us</p>
+    <h2 class="atmo-title">A space to <em>breathe,</em><br>think, and be.</h2>
+    <p class="atmo-text">
+      Nestled in the heart of Indiranagar, Aroma & Co. is designed to feel like your favourite corner of a city you haven't found yet. Warm wood, soft light, and no rush.
+    </p>
+    <div class="hours-grid">
+      <div class="hours-row">
+        <span class="hours-day">Monday – Friday</span>
+        <span class="hours-time">7:30 AM – 9:00 PM</span>
+      </div>
+      <div class="hours-row">
+        <span class="hours-day">Saturday</span>
+        <span class="hours-time">8:00 AM – 10:00 PM</span>
+      </div>
+      <div class="hours-row">
+        <span class="hours-day">Sunday</span>
+        <span class="hours-time">9:00 AM – 8:00 PM</span>
+      </div>
+      <div class="hours-row">
+        <span class="hours-day">📍 Address</span>
+        <span class="hours-time">12th Main, Indiranagar, Bengaluru</span>
+      </div>
+    </div>
+  </div>
+  <div class="atmo-right">
+    <div class="atmo-card-big">
+      <div class="atmo-art">☕</div>
+      <div class="atmo-quote">
+        <blockquote>"The best ideas happen over a cup of something warm."</blockquote>
+        <cite>— The Aroma & Co. Philosophy</cite>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Aroma <span>&</span> Co.</div>
+  <div class="footer-text">© 2025 Aroma & Co. All rights reserved.</div>
+  <div class="footer-links">
+    <a href="#">Instagram</a>
+    <a href="#">Zomato</a>
+    <a href="#">Contact</a>
+  </div>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const follower = document.getElementById('cursorFollower');
+  let mouseX = 0, mouseY = 0, followerX = 0, followerY = 0;
+
+  document.addEventListener('mousemove', e => {
+    mouseX = e.clientX; mouseY = e.clientY;
+    cursor.style.left = mouseX - 6 + 'px';
+    cursor.style.top = mouseY - 6 + 'px';
+  });
+
+  // Smooth follower
+  function animateCursor() {
+    followerX += (mouseX - followerX) * 0.12;
+    followerY += (mouseY - followerY) * 0.12;
+    follower.style.left = followerX - 18 + 'px';
+    follower.style.top = followerY - 18 + 'px';
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+
+  // Cursor scale on hover
+  document.querySelectorAll('a, button, .menu-card, .card-3d').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.transform = 'scale(2)';
+      follower.style.transform = 'scale(1.5)';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.transform = 'scale(1)';
+      follower.style.transform = 'scale(1)';
+    });
+  });
+
+  // 3D card tilt on mouse
+  const card = document.getElementById('card3d');
+  if (card) {
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = (e.clientX - cx) / (rect.width / 2);
+      const dy = (e.clientY - cy) / (rect.height / 2);
+      card.style.transform = `rotateY(${dx * 15}deg) rotateX(${-dy * 10}deg) scale(1.02)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
+  }
+
+  // Scroll reveal
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll(
+    '.section-label, .story-title, .story-text, .story-visual, .stat, .menu-title, .menu-card, .atmo-title, .atmo-text, .hours-grid, .atmo-card-big'
+  ).forEach(el => observer.observe(el));
+
+  // Staggered menu card delays
+  document.querySelectorAll('.menu-card').forEach((card, i) => {
+    card.style.transitionDelay = `${i * 0.1}s`;
+  });
+
+  // Nav scroll effect
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('nav');
+    if (window.scrollY > 60) {
+      nav.style.background = 'rgba(13,8,5,0.95)';
+      nav.style.backdropFilter = 'blur(12px)';
+    } else {
+      nav.style.background = 'linear-gradient(to bottom, rgba(13,8,5,0.9), transparent)';
+      nav.style.backdropFilter = 'blur(2px)';
+    }
+  });
+</script>
+</body>
+</html>
